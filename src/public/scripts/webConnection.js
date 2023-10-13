@@ -1,6 +1,6 @@
 class WebConnection extends EventTarget {
     /** @type {RTCPeerConnection} */
-    #local;
+    #pc;
     /** @type {RTCDataChannel} */
     #dataChannel;
     /** @type {MediaStream} */
@@ -25,7 +25,7 @@ class WebConnection extends EventTarget {
         this.#isHost = asHost;
 
         const rtc = RTCPeerConnection ?? webkitRTCPeerConnection;
-        this.#local = new rtc(webRTCConfig, webRTCConnection);
+        this.#pc = new rtc(webRTCConfig, webRTCConnection);
 
         // Host will select a window to share
         if (this.#isHost) {
@@ -37,12 +37,12 @@ class WebConnection extends EventTarget {
             });
 
             for (const track of this.#stream.getTracks()) {
-                this.#local.addTrack(track, this.#stream);
+                this.#pc.addTrack(track, this.#stream);
             }
         }
 
         // Forward any ice candidates to the server
-        this.#local.onicecandidate = (e) => {
+        this.#pc.onicecandidate = (e) => {
             if (!e || !e.candidate) {
                 return;
             }
@@ -52,7 +52,7 @@ class WebConnection extends EventTarget {
         }
 
         // Add tracks to the local video element
-        this.#local.ontrack = (e) => {
+        this.#pc.ontrack = (e) => {
             this.#log("track!");
             this.#stream = new MediaStream();
             this.#stream.addTrack(e.track);
@@ -74,34 +74,34 @@ class WebConnection extends EventTarget {
             offerToReceiveAudio: false,
             offerToReceiveVideo: true
         };
-        const sdp = await this.#local.createOffer(sdpConstraints);
-        await this.#local.setLocalDescription(sdp);
+        const sdp = await this.#pc.createOffer(sdpConstraints);
+        await this.#pc.setLocalDescription(sdp);
         this.#sendToWebSocket("offer", sdp);
     }
 
     async onOffer(from, offer) {
         this.#log("onOffer");
-        await this.#local.setRemoteDescription(new RTCSessionDescription(offer));
-        const sdp = await this.#local.createAnswer();
-        await this.#local.setLocalDescription(sdp);
+        await this.#pc.setRemoteDescription(new RTCSessionDescription(offer));
+        const sdp = await this.#pc.createAnswer();
+        await this.#pc.setLocalDescription(sdp);
         this.#sendToWebSocket("answer", sdp);
     }
 
     async onIceCandidate(from, candidate) {
         this.#log("onIceCandidate");
-        await this.#local.addIceCandidate(new RTCIceCandidate(candidate));
+        await this.#pc.addIceCandidate(new RTCIceCandidate(candidate));
     }
 
     async onAnswer(from, answer) {
         this.#log("onAnswer");
-        await this.#local.setRemoteDescription(new RTCSessionDescription(answer));
+        await this.#pc.setRemoteDescription(new RTCSessionDescription(answer));
     }
 
     #createDataChannelForCanvas() {
         // Only the host uses the datachannel right now
         if (this.#isHost) {
             // Listen for data sent from the client
-            this.#local.ondatachannel = (e) => {
+            this.#pc.ondatachannel = (e) => {
                 e.channel.onmessage = (e) => {
                     // Display any canvas data on the host screen
                     this.display(e);
@@ -110,7 +110,7 @@ class WebConnection extends EventTarget {
         }
 
         // Create and open the channel
-        this.#dataChannel = this.#local.createDataChannel("datachannel", { reliable: true });
+        this.#dataChannel = this.#pc.createDataChannel("datachannel", { reliable: true });
 
         // Only the host actually listens for the datachannel
         if (this.#isHost) {
