@@ -1,0 +1,22 @@
+{
+    "name": "webrtc-telestrator",
+    "version": "1.0.0",
+    "description": "A remote telestrator app using WebRTC",
+    "main": "src/server.js",
+    "author": "BlankSourceCode",
+    "license": "MIT",
+    "scripts": {
+        "package": "pkg package.json"
+    },
+    "bin": "src/server.js",
+    "pkg": {
+        "assets": "src/public/**/*",
+        "outputPath": "dist"
+    },
+    "dependencies": {
+        "commander": "11.1.0",
+        "data-uri-to-buffer": "6.0.1",
+        "express": "4.18.2",
+        "ws": "8.14.2"
+    }
+}

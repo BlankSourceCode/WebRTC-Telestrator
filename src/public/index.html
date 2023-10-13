@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>WebRTC-Telestrator</title>
+    <link rel="stylesheet" media="screen" href="css/main.css">
+    <script src="scripts/drawingControls.js"></script>
+    <script src="scripts/webConnection.js"></script>
+    <script src="scripts/main.js"></script>
+</head>
+
+<body>
+    <div id="connection">
+        <div id="title">WebRTC-Telestrator</div>
+        <button id="hostButton">Host Session</button>
+        <button id="joinButton">Join</button>
+    </div>
+    <video id="video" class="hide"></video>
+    <div id="drawing" class="hide">
+        <div id="canvasContainer">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div id="tools">
+            <input id="offset" type="number" value="12" />
+            <input id="inset" type="number" value="1" />
+            <button id="clear" title="clear">&#8855;</button>
+            <button id="undo" title="undo">&#10226;</button>
+
+            <div class="colorOption" style="background:white"></div>
+            <div class="colorOption" style="background:black"></div>
+            <div class="colorOption" style="background:red"></div>
+            <div class="colorOption" style="background:green"></div>
+            <div class="colorOption" style="background:blue"></div>
+            <div class="colorOption" style="background:yellow"></div>
+            <input id="colorPicker" type="color" placeholder="colors" />
+            <input id="lineWidth" type="range" min="0" max="10" step="1" />
+            <button id="toggleTools" title="toggle tools">&#8682;</button>
+            <button id="fullscreen" title="fullscreen">&#8689;</button>
+        </div>
+    </div>
+</body>
+
+</html>
