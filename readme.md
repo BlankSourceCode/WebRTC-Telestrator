@@ -11,7 +11,7 @@ A remote telestrator app using WebRTC. Use a remote device (such as a phone or t
 1. On your OBS machine, open a new WebRTC enabled web browser to http://localhost:8888
     * The built in OBS browser source doesn't support WebRTC so you need to use a real browser such as Edge or Chrome.
     * Tested with Windows Microsoft Edge.
-    * Note: Be sure to use 'localhost' and not 'yourhostmachine' as the browser blocks WebRTC share requests on non-https (aka http) servers.
+    * Note: Be sure to use '**localhost**' and not '*yourhostmachine*' because the browser blocks WebRTC share requests on non-https (aka http) servers which this is.
 1. In the browser, click "Host" and select the window/display you want to stream
     * This will be the live image that will be the background for the remote device to see where they are drawing.
     * Some suggestions:
@@ -25,6 +25,9 @@ A remote telestrator app using WebRTC. Use a remote device (such as a phone or t
     * Drawing on the canvas will send the data to the server and display it on the OBS browser source which will then be recorded/streamed as normal.
     * Happy drawing!
 
+## Example
+
+![Usage Demo](WebRTC-Telestrator.gif)
 
 ## Development Setup
 * Clone this repo
