@@ -77,6 +77,10 @@ function connect(asHost) {
     // Forward websocket signalling messages to the connection
     webSocket.onopen = (e) => {
         connection.create(asHost);
+        if (!asHost) {
+            // Request any host info
+            webSocket.send("request");
+        }
     };
     webSocket.onclose = (e) => {
     };

@@ -53,7 +53,6 @@ class WebConnection extends EventTarget {
 
         // Add tracks to the local video element
         this.#pc.ontrack = (e) => {
-            this.#log("track!");
             this.#stream = new MediaStream();
             this.#stream.addTrack(e.track);
 
@@ -69,18 +68,21 @@ class WebConnection extends EventTarget {
         // Note: We don't actually do this anymore
         // this.#createDataChannelForCanvas();
 
-        // Offer the connection
-        const sdpConstraints = {
-            offerToReceiveAudio: false,
-            offerToReceiveVideo: true
-        };
-        const sdp = await this.#pc.createOffer(sdpConstraints);
-        await this.#pc.setLocalDescription(sdp);
-        this.#sendToWebSocket("offer", sdp);
+        // Offer the connection as a host
+        // A client joining will just recieve the offer via the cache in the server
+        // TODO: Support multiple clients
+        if (this.#isHost) {
+            const sdpConstraints = {
+                offerToReceiveAudio: false,
+                offerToReceiveVideo: true
+            };
+            const sdp = await this.#pc.createOffer(sdpConstraints);
+            await this.#pc.setLocalDescription(sdp);
+            this.#sendToWebSocket("offer", sdp);
+        }
     }
 
     async onOffer(from, offer) {
-        this.#log("onOffer");
         await this.#pc.setRemoteDescription(new RTCSessionDescription(offer));
         const sdp = await this.#pc.createAnswer();
         await this.#pc.setLocalDescription(sdp);
@@ -88,12 +90,10 @@ class WebConnection extends EventTarget {
     }
 
     async onIceCandidate(from, candidate) {
-        this.#log("onIceCandidate");
         await this.#pc.addIceCandidate(new RTCIceCandidate(candidate));
     }
 
     async onAnswer(from, answer) {
-        this.#log("onAnswer");
         await this.#pc.setRemoteDescription(new RTCSessionDescription(answer));
     }
 

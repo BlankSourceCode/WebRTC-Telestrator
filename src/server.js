@@ -40,6 +40,7 @@ function sendMJpeg(msg) {
 
 // Create the websocket signaling server
 const wsList = [];
+const wsMessages = [];
 const wss = new WebSocketServer({ port: (port + 1) });
 wss.on("connection", function (ws) {
     wsList.push(ws);
@@ -48,20 +49,37 @@ wss.on("connection", function (ws) {
         wsList.splice(wsList.indexOf(ws), 1);
 
         // On a disconnect, clear out the canvas
+        // We have to do this twice because some browsers (OBS) seem to cache the frames
+        sendMJpeg(emptyImage);
         sendMJpeg(emptyImage);
     });
 
     ws.on("message", function (message) {
         const msg = message.toString();
-        
+
         if (msg[0] === "d") {
+            // Update the mjpeg
             sendMJpeg(msg);
         } else if (msg[0] === "l") {
+            // Log the message
             console.log(msg);
+        } else if (msg[0] === "r") {
+            // On a request for host info, just fire any cached messages
+            while (wsMessages.length > 0) {
+                const msg = wsMessages.pop();
+                for (var i = 0; i < wsList.length; i++) {
+                    wsList[i].send(msg);
+                }
+            }
         } else {
-            console.log(msg);
-            for (var i = 0; i < wsList.length; i++) {
-                wsList[i].send(msg);
+            if (wsList.length < 2) {
+                // No client, so cache the messages
+                wsMessages.push(msg);
+            } else {
+                // Broadcast messages
+                for (var i = 0; i < wsList.length; i++) {
+                    wsList[i].send(msg);
+                }
             }
         }
     });
