@@ -1,5 +1,6 @@
 const os = require("os");
 const express = require("express");
+const http = require("http");
 const WebSocketServer = require("ws").Server;
 const { program, InvalidArgumentError } = require("commander");
 const { dataUriToBuffer } = require("data-uri-to-buffer");
@@ -17,12 +18,20 @@ program
             throw new InvalidArgumentError("Not a number.");
         }
         return parsedValue;
+    })
+    .option("-wh, --wssHost <ip address>", "specify ip address to bind the websocket server to", (value) => {
+        return value;
+    })
+    .option("-hh, --httpHost <ip address>", "specify ip address to bind the http server to", (value) => {
+        return value;
     });
 
 // Parse command line
 program.parse(process.argv);
 const opts = program.opts();
 const port = opts.port || 8888;
+const wssHost = opts.wssHost || "localhost";
+const httpHost = opts.httpHost || "localhost";
 
 // Function to stream the canvas image out to obs
 const mjpegStreams = [];
@@ -40,8 +49,7 @@ function sendMJpeg(msg) {
 
 // Create the websocket signaling server
 const wsList = [];
-const wsMessages = [];
-const wss = new WebSocketServer({ port: (port + 1) });
+const wss = new WebSocketServer({ host: wssHost, port: (port + 1) });
 wss.on("connection", function (ws) {
     wsList.push(ws);
 
@@ -101,7 +109,7 @@ app.get("/img", (req, res) => {
 });
 app.use(express.static(__dirname + "/public"));
 
-app.listen(port, () => {
+app.listen(port, httpHost, () => {
     console.log(``);
     console.log(`---------------------------`);
     console.log(`Welcome to WebRTC-Telestrator`);
@@ -109,8 +117,8 @@ app.listen(port, () => {
     console.log(`Http server is running on port ${port}`);
     console.log(`WebSocket server is running on port ${parseInt(port) + 1}`);
     console.log(``);
-    console.log(`1. Add a BrowserSource to http://localhost:${port}/obs.html`);
-    console.log(`2. Open a local browser to http://localhost:${port} and click "Host" to select a sharing window`);
+    console.log(`1. Add a BrowserSource to http://${httpHost}:${port}/obs.html`);
+    console.log(`2. Open a local browser to http://${httpHost}:${port} and click "Host" to select a sharing window`);
     console.log(`3. Open a remote browser to http://${os.hostname()}:${port} and click "Join" to begin telestrating`);
     console.log(``);
 });
