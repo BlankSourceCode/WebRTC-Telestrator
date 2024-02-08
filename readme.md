@@ -2,6 +2,10 @@
 
 A remote telestrator app using WebRTC. Use a remote device (such as a phone or tablet) to draw on your screen while recording/streaming via OBS. Rather than just having a blank 'greenscreen' to draw on, this app streams a specified display so that you can see exactly where you are drawing on your device.
 
+## Example
+
+![Usage Demo](WebRTC-Telestrator.gif)
+
 ## Usage
 1. Launch webrtc-telestrator
     * This will start a small http/websocket server on port 8888 (by default).
@@ -25,9 +29,17 @@ A remote telestrator app using WebRTC. Use a remote device (such as a phone or t
     * Drawing on the canvas will send the data to the server and display it on the OBS browser source which will then be recorded/streamed as normal.
     * Happy drawing!
 
-## Example
+## Notes
+* By default the http server will bind to all available network interfaces (via 0.0.0.0). 
+* You can override this by specifying the `--bind <ip address>` option, but doing so will cause display sharing to stop working (due to a browser security feature preventing sharing over http unless its localhost).
+* As a workaround, you can use the `--unsafely-treat-insecure-origin-as-secure` flag in chromium based browsers to re-enable sharing:
+    1. Open Chrome/Edge
+    1. Navigate to `chrome://flags` or `edge://flags`
+    1. Search for `unsafely-treat-insecure-origin-as-secure`
+    1. Enable the flag via the dropdown
+    1. In the textbox enter the full url for webrtc-telestrator `http://<ip address>:<port>`
+    1. Click the `Restart` browser button to apply the change
 
-![Usage Demo](WebRTC-Telestrator.gif)
 
 ## Development Setup
 * Clone this repo
@@ -36,3 +48,9 @@ A remote telestrator app using WebRTC. Use a remote device (such as a phone or t
 * Press `F5` to start debugging
 
 To anyone brave enough to use this - Good Luck!
+
+##
+
+Want to support me staying awake long enough to add some more features?
+
+<a href="https://www.buymeacoffee.com/blanksourcecode" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
