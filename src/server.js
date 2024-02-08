@@ -1,5 +1,6 @@
 const os = require("os");
 const express = require("express");
+const http = require("http");
 const WebSocketServer = require("ws").Server;
 const { program, InvalidArgumentError } = require("commander");
 const { dataUriToBuffer } = require("data-uri-to-buffer");
@@ -17,12 +18,16 @@ program
             throw new InvalidArgumentError("Not a number.");
         }
         return parsedValue;
+    })
+    .option("-b, --bind <ip address>", "specify the ip address on which to bind the server (default: 0.0.0.0)", (value) => {
+        return value;
     });
 
 // Parse command line
 program.parse(process.argv);
 const opts = program.opts();
 const port = opts.port || 8888;
+const bind = opts.bind || undefined;
 
 // Function to stream the canvas image out to obs
 const mjpegStreams = [];
@@ -41,7 +46,7 @@ function sendMJpeg(msg) {
 // Create the websocket signaling server
 const wsList = [];
 const wsMessages = [];
-const wss = new WebSocketServer({ port: (port + 1) });
+const wss = new WebSocketServer({ host: bind, port: (port + 1) });
 wss.on("connection", function (ws) {
     wsList.push(ws);
 
@@ -101,16 +106,30 @@ app.get("/img", (req, res) => {
 });
 app.use(express.static(__dirname + "/public"));
 
-app.listen(port, () => {
+// Get the addresses needed by the user
+let localAddress = "localhost";
+let remoteAddress = os.hostname();
+
+if (bind && bind !== "0.0.0.0") {
+    localAddress = remoteAddress = bind;
+}
+
+app.listen(port, bind, () => {
     console.log(``);
-    console.log(`---------------------------`);
+    console.log(`-----------------------------`);
     console.log(`Welcome to WebRTC-Telestrator`);
-    console.log(`---------------------------`);
+    console.log(`-----------------------------`);
     console.log(`Http server is running on port ${port}`);
     console.log(`WebSocket server is running on port ${parseInt(port) + 1}`);
     console.log(``);
-    console.log(`1. Add a BrowserSource to http://localhost:${port}/obs.html`);
-    console.log(`2. Open a local browser to http://localhost:${port} and click "Host" to select a sharing window`);
-    console.log(`3. Open a remote browser to http://${os.hostname()}:${port} and click "Join" to begin telestrating`);
+    console.log(`1. Add a BrowserSource to http://${localAddress}:${port}/obs.html`);
+    console.log(`2. Open a local browser to http://${localAddress}:${port} and click "Host" to select a sharing window`);
+    console.log(`3. Open a remote browser to http://${remoteAddress}:${port} and click "Join" to begin telestrating`);
     console.log(``);
+    if (localAddress !== "localhost" && localAddress !== "127.0.0.1" && localAddress !== "0.0.0.0") {
+        console.log(`Custom host binding set to ${localAddress}`);
+        console.log(`To enable display sharing over http on the local browser: `);
+        console.log(`Use --unsafely-treat-insecure-origin-as-secure="http://${localAddress}:${port}" (see github readme)`);
+        console.log(``);
+    }
 });
