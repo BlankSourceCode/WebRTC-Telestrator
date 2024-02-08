@@ -49,6 +49,7 @@ function sendMJpeg(msg) {
 
 // Create the websocket signaling server
 const wsList = [];
+const wsMessages = [];
 const wss = new WebSocketServer({ host: wssHost, port: (port + 1) });
 wss.on("connection", function (ws) {
     wsList.push(ws);
