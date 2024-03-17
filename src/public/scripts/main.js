@@ -33,7 +33,7 @@ function initialize() {
 
     const debug = false;
     if (debug) {
-        webSocket = new WebSocket(`ws://${location.hostname}:${parseInt(location.port) + 1}`);
+        webSocket = new WebSocket(`ws://${location.hostname}:${location.port}`);
         drawingControls.enable(null, webSocket);
     }
 
@@ -57,7 +57,7 @@ function initialize() {
  * @param {bool} asHost 
  */
 function connect(asHost) {
-    webSocket = new WebSocket(`ws://${location.hostname}:${parseInt(location.port) + 1}`);
+    webSocket = new WebSocket(`ws://${location.hostname}:${location.port}`);
 
     // Create the peer connection and listen for the connected event
     connection = new WebConnection();
